@@ -1,0 +1,50 @@
+version: 1
+entries:
+  - name: Monthly Planning
+    description:
+        Define goals, align with previous period, refine backlog
+    date: 1
+    business_day: false
+  - name: Send invoice for Godel
+    date: 30
+    business_day: true
+  - name: Pay For Kindergarten
+    date: 8
+    business_day: true
+  - name: Pay Rent
+    date: 9
+    business_day: true
+  - name: Pay Tax/Zus/Biuro Vide
+    date: 20
+    business_day: true
+  - name: Money Day
+    date: 20
+    business_day: false
+    description:
+      Collect all payments, log all budgets, plan next financial term.
+  - name: Pay BMW Leasing
+    date: 27
+    business_day: true
+  - name: Log all car trips
+    date: 1
+    business_day: true
+  - name: Log Expenses
+    date: 7
+    business_day: true
+  - name: Log Expenses
+    date: 14
+    business_day: true
+  - name: Log Expenses
+    date: 21
+    business_day: true
+  - name: Log Expenses
+    date: 28
+    business_day: true
+  - name: Log Expenses
+    date: 2
+    business_day: true
+  - name: monthly Summary
+    date: 30
+    business_day: true
+    description:
+      Review Goals defined for the month, review if all reccurent tasks was done, write all achievements
