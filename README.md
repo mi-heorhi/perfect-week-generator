@@ -27,6 +27,11 @@ python main.py --ls-cal
 First one is for all day events, like payments or taxes. With follow command you can generate events from you template to calendar.
 Specify name, duration, date and color for your event. The `business_day` flag serves to indicate if the event should be during business day. If this flag is true, the event will be moved to closes date before the week end.
 
+### { YOU_CALENDAR_ID }
+
+It should be id from list of calendars.
+`Calendar: Month plan, ID: {xxxxxxxxxxx}@group.calendar.google.com` - copy symbols before @ sign.
+
 ```yaml
 version: 1
 type: all-day
