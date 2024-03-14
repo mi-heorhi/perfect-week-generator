@@ -1,6 +1,6 @@
 version: 1
 type: all-day
-calendar-id: e9ec56uo8ukqakntane7tduhdk
+calendar-id: { YOU_CALENDAR_ID }
 entries:
   - name: 🍬Monthly Planning🍬
     description: Define goals, align with previous period, refine backlog, and plan the month.
