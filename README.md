@@ -4,6 +4,16 @@
 
 This application provides routine automation to add template tasks to your Google calendar.
 
+## Requirements
+
+1. Python 3.9: The code snippets provided are in Python, so you'll need to have Python installed on your machine.
+2. Pip: The Python package installer is used to install the project's dependencies.
+3. Google Calendar API: The application interacts with Google Calendar, so you'll need access to the Google Calendar API.
+4. YAML files: The application uses YAML files as templates for events.
+5. Git: The usage instructions suggest that you'll need Git to clone the repository.
+6. A Google account: Since this application interacts with Google Calendar, you'll need a Google account.
+7. Dependencies listed in the requirements.txt file: You'll need to install these using pip.
+
 ## Installation
 
 ```bash
