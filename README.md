@@ -37,11 +37,6 @@ python main.py --ls-cal
 First one is for all day events, like payments or taxes. With follow command you can generate events from you template to calendar.
 Specify name, duration, date and color for your event. The `business_day` flag serves to indicate if the event should be during business day. If this flag is true, the event will be moved to closes date before the week end.
 
-### { YOU_CALENDAR_ID }
-
-It should be id from list of calendars.
-`Calendar: Month plan, ID: {xxxxxxxxxxx}@group.calendar.google.com` - copy symbols before @ sign.
-
 ```yaml
 version: 1
 type: all-day
@@ -84,23 +79,10 @@ week:
   7: # ...
 ```
 
-## Google Calendar API Setup
+### { YOU_CALENDAR_ID }
 
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a new project or select an existing one.
-3. Once in your project, go to the "Library" section and enable the "Google Calendar API".
-4. Go to the "Credentials" section and create new credentials. Choose "OAuth client ID".
-5. Configure the OAuth consent screen. Choose "External" for the user type. Fill in the necessary details.
-6. When creating the OAuth client ID, select "Desktop app" as the application type.
-7. Download the JSON file of your credentials.
-8. Copy you calendar id to you .yml file as calendar-id.
-9. Execute from command line script to get list of calendars.
-
-```bash
-python main.py --ls-cal
-```
-
-10. Run to push events from YAML template ro Google calendar.
+It should copied output of `python main.py --ls-cal` from list of calendars.
+`Calendar: Month plan, ID: {xxxxxxxxxxx}@group.calendar.google.com` - copy symbols before @ sign. Past this id to you template, to define destination calendar.
 
 ```bash
 python main.py --frame next-month --template month_plan.yaml
@@ -109,6 +91,16 @@ python main.py --frame next-month --template month_plan.yaml
 ```bash
 python main.py --frame next-week --template week_plan.yaml
 ```
+
+## Google Calendar API Setup
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Create a new project or select an existing one.
+3. Once in your project, go to the "Library" section and enable the "Google Calendar API".
+4. Go to the "Credentials" section and create new credentials. Choose "OAuth client ID".
+5. Configure the OAuth consent screen. Choose "External" for the user type. Fill in the necessary details.
+6. When creating the OAuth client ID, select "Desktop app" as the application type.
+7. Download the JSON file of your credentials to directory with main.py file.
 
 ## Contributing
 
