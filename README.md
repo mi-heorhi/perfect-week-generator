@@ -84,11 +84,20 @@ week:
 6. When creating the OAuth client ID, select "Desktop app" as the application type.
 7. Download the JSON file of your credentials.
 8. Copy you calendar id to you .yml file as calendar-id.
-9. Run from command line
+9. Execute from command line script to get list of calendars.
 
 ```bash
-python main.py week_plan.yml next-week
+python main.py --ls-cal
+```
 
+10. Run to push events from YAML template ro Google calendar.
+
+```bash
+python main.py --frame next-month --template month_plan.yaml
+```
+
+```bash
+python main.py --frame next-week --template week_plan.yaml
 ```
 
 ## Contributing
