@@ -2,66 +2,66 @@ import calendar
 from datetime import datetime, timedelta, date
 from io import open as file
 
+from datetime import datetime
+import time
+from dateutil.tz import tzlocal
+from tzlocal import get_localzone
 import pytz
 import yaml
+import argparse
 from yaml import Loader
 
 from cal_setup import get_calendar_service
 
-TIME_ZONE_NAME = 'Europe/Warsaw'
-time_zone = pytz.timezone(TIME_ZONE_NAME)
-CALENDAR_ID = '1l5manvl5d049idjb0dg5ilujo'
-CURRENT_M = 12
-CURRENT_Y = 2023
 
-
-def create_single_event(name, dtstart, dtend, description):
+def create_single_event(name, dt_start, dt_end, description, color, time_zone):
     event = {
         'summary': name,
         'description': description,
         'start': {
-            'dateTime': dtstart.strftime('%Y-%m-%dT%H:%M:00'),
-            'timeZone': TIME_ZONE_NAME
+            'dateTime': dt_start.strftime('%Y-%m-%dT%H:%M:00'),
+            'timeZone': time_zone
         },
         'end': {
-            'dateTime': dtend.strftime('%Y-%m-%dT%H:%M:00'),
-            'timeZone': TIME_ZONE_NAME
+            'dateTime': dt_end.strftime('%Y-%m-%dT%H:%M:00'),
+            'timeZone': time_zone
         },
         'reminders': {
             'useDefault': False,
         },
         'transparency': "transparent",
+        'background': color,
+        'status': "confirmed"
     }
     return event
 
 
-def create_all_day_event(name, d, description):
+def create_all_day_event(name, date, description, color):
     event = {
         'summary': name,
         'description': description,
         'start': {
-            'date': d.strftime('%Y-%m-%d'),
+            'date': date.strftime('%Y-%m-%d'),
         },
         'end': {
-            'date': d.strftime('%Y-%m-%d'),
+            'date': date.strftime('%Y-%m-%d'),
         },
         'reminders': {
             'useDefault': False,
         },
         'transparency': "transparent",
+        'status': "confirmed",
+        'background': color,
     }
     return event
 
 
-def insert_events_calendar(events):
+def insert_events_calendar(calendar_id, events):
     service = get_calendar_service()
-    print('Events to insert: ' + str(len(events)))
-    s = datetime.now()
     for event in events:
-        print('Event to insert is: '+event['summary'])
-        service.events().insert(calendarId= CALENDAR_ID + '@group.calendar.google.com', body=event).execute()
+        service.events().insert(calendarId=calendar_id +
+                                '@group.calendar.google.com', body=event).execute()
     e = datetime.now()
-    print('Complete at: '+str((e-s) / 60))
 
 
 def get_business_day_before_weekend(d):
@@ -80,58 +80,131 @@ def is_weekend(d):
     return d.weekday() == 5 or d.weekday() == 6
 
 
-def generate_all_day_events(stream):
+def generate_all_day_events(template, day_range):
     events = []
-    plan = yaml.load(stream, Loader)
-    for item in plan['entries']:
-        should_be_business_day = item['business_day']
-        d = date(CURRENT_Y, CURRENT_M, int(item['date']))
-        if is_weekend(d) and should_be_business_day is True:
-            d = get_business_day_before_weekend(d)
-        description = ''
-        if 'description' in item:
-            description = item['description']
-        events.append(create_all_day_event(item['name'], d, description))
+    if template.get('entries') is not None:
+        entries = template['entries']
+        if entries is not None:
+            day_numbers = [d.day for d in day_range]
+            matching_entries = [e for e in entries if any(
+                d == e['date'] for d in day_numbers)]
+            for item in matching_entries:
+                event = {}
+                name = ''
+                description = ''
+                color = ''
+                day = None
+                if 'name' in item:
+                    name = item['name']
+                if 'description' in item:
+                    description = item['description']
+                if 'color' in item:
+                    color = item['color']
+                if item['business_day'] is not None:
+                    if item['business_day']:
+                        day = get_business_day_before_weekend(
+                            day_range[day_numbers.index(item['date'])])
+                    else:
+                        day = day_range[day_numbers.index(item['date'])]
+                event = create_all_day_event(name, day, description, color)
+                events.append(event)
     return events
 
 
-def generate_single_events(stream, day_range):
+def generate_single_events(template, day_range):
     events = []
-    plan = yaml.load(stream, Loader)
-    for d in day_range:
-        for item in plan['entries']:
-            description = ''
-            if 'description' in item:
-                description = item['description']
-            parsed_string = str(item['startAt']).split("-")
-            start_hour = int(parsed_string[0])
-            start_minute = 0 if len(parsed_string) == 1 else int(parsed_string[1])
-            start = datetime(d.year, d.month, d.day, start_hour, start_minute, 0, tzinfo=time_zone)
-            end = start + timedelta(minutes=item['duration'])
-            events.append(create_single_event(item['name'], start, end, description))
+    time_zone = get_current_timezone()
+    week_plan = template['week']
+    if template.get('week') is not None:
+        for d in day_range:
+            day_plan = week_plan[d.weekday()+1]
+            if day_plan is not None:
+                for item in day_plan:
+                    description = ''
+                    if 'description' in item:
+                        description = item['description']
+                    parsed_string = str(item['startAt']).split("-")
+                    start_hour = int(parsed_string[0])
+                    start_minute = 0 if len(
+                        parsed_string) == 1 else int(parsed_string[1])
+                    start = datetime(
+                        d.year, d.month, d.day, start_hour, start_minute, 0, tzinfo=time_zone)
+                    end = start + timedelta(minutes=item['duration'])
+                    events.append(create_single_event(
+                        item['name'], start, end, description, item['color'], time_zone.key))
     return events
 
 
-def generate_b_days():
-    print('generate b-days')
+def get_current_timezone():
+    current_timezone = get_localzone()
+    return current_timezone
+
+
+def get_date_range_next_week():
+    next_week_start = date.today() + timedelta(days=(0 - date.today().weekday()) % 7)
+    date_range = [next_week_start + timedelta(days=i) for i in range(7)]
+    return date_range
+
+
+def get_date_range_next_month():
+    next_month = date.today().replace(day=1) + timedelta(days=32)
+    next_month_days = calendar.monthrange(next_month.year, next_month.month)[1]
+    date_range = [next_month.replace(day=i)
+                  for i in range(1, next_month_days+1)]
+    return date_range
+
+
+def generate_events_from_template(template, date_range):
+    calendar_id = template['calendar-id']
+    type = template['type']
+    if type == 'single':
+        events = generate_single_events(template, date_range)
+        insert_events_calendar(calendar_id, events)
+    elif type == 'all-day':
+        events = generate_all_day_events(template, date_range)
+        insert_events_calendar(calendar_id, events)
+
+
+def generate_from_template(stream, frame):
+    template = yaml.load(stream, Loader)
+    date_range = []
+    if frame == 'next-week':
+        date_range = get_date_range_next_week()
+    elif frame == 'next-month':
+        date_range = get_date_range_next_month()
+    generate_events_from_template(template, date_range)
 
 
 def main():
-    events = []
-    num_days = calendar.monthrange(CURRENT_Y, CURRENT_M)[1]
-    days = [date(CURRENT_Y, CURRENT_M, day) for day in range(1, num_days + 1)]
-    # 1. get range of all business and generate all events from business_day_plan.yaml
-    business_day_plan = generate_single_events(stream=file('week_plan.yaml', 'r'),
-                                               day_range=filter(lambda d: is_business_day(d), days))
+    try:
+        s = datetime.now()
+        parser = argparse.ArgumentParser(prog='perfect-week-generator')
+        parser.add_argument('--ls-cal', action='store_true',
+                            help='List all the available calendars')
+        parser.add_argument(
+            '--frame', choices=['next-week', 'next-month'], help='Frame of the plan')
+        parser.add_argument(
+            '--template', type=argparse.FileType('r'), help='YAML file with plan')
+        args = parser.parse_args()
 
-    # 3. Generate events for month from month_plan.yaml
-    month_plan = generate_all_day_events(stream=file('month_plan.yaml', 'r'))
-    print('Generating events')
-    # 4. b-days events is TBD, will be generated once a year!
-    # 5. Insert all to the calendar
-    print('Insert events to calendar')
-    insert_events_calendar(events=business_day_plan)
-    print('Done!')
+        if args.ls_cal:
+            service = get_calendar_service()
+            calendars = service.calendarList().list().execute()
+            for calendar in calendars['items']:
+                print(f"Calendar: {calendar['summary']}, ID: {calendar['id']}")
+        elif args.frame and args.template:
+            frame = args.frame
+            template = args.template
+            stream = file(template.name, 'r')
+            generate_from_template(stream, frame)
+        else:
+            print(
+                "Invalid arguments. Please provide either --ls-cal or both --frame and --template.")
+
+        e = datetime.now()
+        print('Complete at: '+str((e-s) / 60))
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 if __name__ == '__main__':

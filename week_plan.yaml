@@ -1,13 +1,21 @@
 version: 1
-entries:
-  - 1:
-    - name: Work(Session#1)
-      startAt: 10-30
-      duration: 30
-      description:
-        Follow a plan.
-  - 2:
-    - name: "Work(Session#1)"
-      startAt: 10-30
-      duration: 30
-      description:  Follow a plan.
+type: single
+calendar-id: { YOU_CALENDAR_ID }
+week:
+  1: # Monday
+    - name: 🌻Wake Up
+      startAt: 10-00
+      duration: 15
+      color: "#BEDAE3"
+      description: Good Morning
+    - name: 🏖️Morning planing
+      startAt: 10-15
+      duration: 15
+      color: "#BEDAE3"
+      description: Keep-up.
+  2: # Tuesday
+  3: # ...
+  4: # ...
+  5: # ...
+  6: # ...
+  7: # ...

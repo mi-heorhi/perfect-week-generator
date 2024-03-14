@@ -16,6 +16,59 @@ pip install -r requirements.txt
 2. Install dependencies.
 3. Your template for a week events could be stored on github as a private repository.
 
+This application support 2 types of templates in YAML format.
+
+With command you can get list of calendars.
+
+```bash
+python main.py --ls-cal
+```
+
+First one is for all day events, like payments or taxes. With follow command you can generate events from you template to calendar.
+Specify name, duration, date and color for your event. The `business_day` flag serves to indicate if the event should be during business day. If this flag is true, the event will be moved to closes date before the week end.
+
+```yaml
+version: 1
+type: all-day
+calendar-id: { YOU_CALENDAR_ID }
+entries:
+  - name: Destroy the ring in fire of Mountain Doom
+    description: Some description
+    date: 1
+    business_day: false
+    color: "#FED5CF" # Should be HEX formate
+```
+
+Second for events that could happened during your productive day. Run this command to generate you perfect week template to you Google calendar.
+
+```bash
+python main.py --frame next-week --template week_plan.yaml
+```
+
+```yaml
+version: 1
+type: single
+calendar-id: { YOU_CALENDAR_ID }
+week:
+  1: # Monday
+    - name: Wake Up
+      startAt: 10-00
+      duration: 15
+      color: "#BEDAE3"
+      description: Good Morning
+    - name: Morning planing
+      startAt: 10-00
+      duration: 15
+      color: "#BEDAE3"
+      description: Keep-up.
+  2: # Tuesday
+  3: # ...
+  4: # ...
+  5: # ...
+  6: # ...
+  7: # ...
+```
+
 ## Google Calendar API Setup
 
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
@@ -25,6 +78,13 @@ pip install -r requirements.txt
 5. Configure the OAuth consent screen. Choose "External" for the user type. Fill in the necessary details.
 6. When creating the OAuth client ID, select "Desktop app" as the application type.
 7. Download the JSON file of your credentials.
+8. Copy you calendar id to you .yml file as calendar-id.
+9. Run from command line
+
+```bash
+python main.py week_plan.yml next-week
+
+```
 
 ## Contributing
 
