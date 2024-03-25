@@ -14,7 +14,7 @@ from yaml import Loader
 from cal_setup import get_calendar_service
 
 
-def create_single_event(name, dt_start, dt_end, description, color, time_zone):
+def create_single_event(name, dt_start, dt_end, description, time_zone):
     event = {
         'summary': name,
         'description': description,
@@ -35,7 +35,7 @@ def create_single_event(name, dt_start, dt_end, description, color, time_zone):
     return event
 
 
-def create_all_day_event(name, date, description, color):
+def create_all_day_event(name, date, description):
     event = {
         'summary': name,
         'description': description,
@@ -90,21 +90,18 @@ def generate_all_day_events(template, day_range):
                 event = {}
                 name = ''
                 description = ''
-                color = ''
                 day = None
                 if 'name' in item:
                     name = item['name']
                 if 'description' in item:
                     description = item['description']
-                if 'color' in item:
-                    color = item['color']
                 if item['business_day'] is not None:
                     if item['business_day']:
                         day = get_business_day_before_weekend(
                             day_range[day_numbers.index(item['date'])])
                     else:
                         day = day_range[day_numbers.index(item['date'])]
-                event = create_all_day_event(name, day, description, color)
+                event = create_all_day_event(name, day, description)
                 events.append(event)
     return events
 
@@ -129,7 +126,7 @@ def generate_single_events(template, day_range):
                         d.year, d.month, d.day, start_hour, start_minute, 0, tzinfo=time_zone)
                     end = start + timedelta(minutes=item['duration'])
                     events.append(create_single_event(
-                        item['name'], start, end, description, item['color'], time_zone.key))
+                        item['name'], start, end, description, time_zone.key))
     return events
 
 
@@ -188,7 +185,6 @@ def generate_from_template(stream, frame):
         date_range = get_date_range_this_month()
     elif frame == 'this-week':
         date_range = get_date_range_this_week()
-    print(date_range)
     generate_events_from_template(template, date_range)
 
 
