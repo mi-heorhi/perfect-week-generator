@@ -30,7 +30,6 @@ def create_single_event(name, dt_start, dt_end, description, color, time_zone):
             'useDefault': False,
         },
         'transparency': "transparent",
-        'background': color,
         'status': "confirmed"
     }
     return event
@@ -51,7 +50,6 @@ def create_all_day_event(name, date, description, color):
         },
         'transparency': "transparent",
         'status': "confirmed",
-        'background': color,
     }
     return event
 
@@ -146,6 +144,20 @@ def get_date_range_next_week():
     return date_range
 
 
+def get_date_range_this_week():
+    this_week_start = date.today() + timedelta(days=(0 - date.today().weekday()) % 7)
+    date_range = [this_week_start + timedelta(days=i) for i in range(7)]
+    return date_range
+
+
+def get_date_range_this_month():
+    this_month = date.today().replace(day=1)
+    this_month_days = calendar.monthrange(this_month.year, this_month.month)[1]
+    date_range = [this_month.replace(day=i)
+                  for i in range(1, this_month_days+1)]
+    return date_range
+
+
 def get_date_range_next_month():
     next_month = date.today().replace(day=1) + timedelta(days=32)
     next_month_days = calendar.monthrange(next_month.year, next_month.month)[1]
@@ -172,6 +184,11 @@ def generate_from_template(stream, frame):
         date_range = get_date_range_next_week()
     elif frame == 'next-month':
         date_range = get_date_range_next_month()
+    elif frame == 'this-month':
+        date_range = get_date_range_this_month()
+    elif frame == 'this-week':
+        date_range = get_date_range_this_week()
+    print(date_range)
     generate_events_from_template(template, date_range)
 
 
@@ -182,7 +199,7 @@ def main():
         parser.add_argument('--ls-cal', action='store_true',
                             help='List all the available calendars')
         parser.add_argument(
-            '--frame', choices=['next-week', 'next-month'], help='Frame of the plan')
+            '--frame', choices=['this-week', 'this-month', 'next-week', 'next-month'], help='Frame of the plan')
         parser.add_argument(
             '--template', type=argparse.FileType('r'), help='YAML file with plan')
         args = parser.parse_args()
